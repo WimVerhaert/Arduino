@@ -11,3 +11,6 @@ libraries/UTFT_Buttons/UTFT_Buttons.h
 *.properties
 libraries/
 *.hex
+sketch_jan11b/sketch_jan11b.ino
+sketch_mar08a/sketch_mar08a.ino
+sketch_mar14a/sketch_mar14a.ino
