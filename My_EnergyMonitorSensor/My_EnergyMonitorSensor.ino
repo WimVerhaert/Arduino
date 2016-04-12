@@ -22,7 +22,7 @@
  * Version 1.0 - Wim Verhaert
  * 
  * DESCRIPTION
- * Use this sensor to measure KWH and Watt of your house meter
+ * Use this sensor to measure KWH and Watt of my Landis&Gyr house E-meter
  * The sensor starts by fetching current KWH value from gateway.
  * Reports both KWH and Watt back to gateway.
  *
@@ -42,13 +42,13 @@
 #define CHILD_ID_E 1            // Id of the sensor child L&G meter
 #define CHILD_ID_H 2            // Id of the sensor child Watermeter
 
-#define WATERMETER_INPUT_SENSOR 2  // the pin we are interested in
-#define EMETER_INPUT_SENSOR 3  // The digital input you attached your light sensor.  (Only 2 and 3 generates interrupt!)
+#define WATERMETER_INPUT_SENSOR 2  // the watermeter reedcontact pin we are interested in connected to pin 2
+#define EMETER_INPUT_SENSOR 3  // The digital input you attached your light sensor in connected to pin 3.  (Only 2 and 3 generates interrupt!)
 #define INTERRUPT_E EMETER_INPUT_SENSOR-2 // Usually the interrupt = pin -2 (on uno/nano anyway)
 #define INTERRUPT_H WATERMETER_INPUT_SENSOR-2 // Usually the interrupt = pin -2 (on uno/nano anyway)
 
 #define SLEEP_MODE false        // Watt-value can only be reported when sleep mode is false.
-unsigned long SEND_FREQUENCY = 5000; // Minimum time between send (in milliseconds). We don't want to spam the gateway.
+unsigned long SEND_FREQUENCY = 10000; // Minimum time between send (in milliseconds). We don't want to spam the gateway.
 
 #define PULSE_FACTOR_E 1000       // Nummber of blinks per KWH of your meter
 #define PULSE_FACTOR_H 5       // Nummber of blinks per liter of your meter
