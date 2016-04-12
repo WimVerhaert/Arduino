@@ -1,0 +1,13 @@
+libraries/UTFT_Buttons/version.txt
+libraries/UTFT_Buttons/UTFT_Buttons.h
+*.cpp
+*.h
+*.html
+*.css
+*.gif
+*.png
+*.pde
+*.txt
+*.properties
+libraries/
+*.hex
