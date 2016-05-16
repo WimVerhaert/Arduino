@@ -34,7 +34,7 @@
 #include <SPI.h>
 
 #define SKETCH_NAME "Cat Door"
-#define SKETCH_MAJOR_VER "1"
+#define SKETCH_MAJOR_VER "2"
 #define SKETCH_MINOR_VER "0"
 
 #define PRIMARY_CHILD_ID 3
@@ -42,6 +42,7 @@
 
 #define PRIMARY_BUTTON_PIN 2   // Arduino Digital I/O pin for button switch
 #define SECONDARY_BUTTON_PIN 3 // Arduino Digital I/O pin for button switch
+#define BATTERY_SENSE_PIN A0  // select the input pin for the battery sense point
 
 #if (PRIMARY_BUTTON_PIN < 2 || PRIMARY_BUTTON_PIN > 3)
 #error PRIMARY_BUTTON_PIN must be either 2 or 3 for interrupts to work
@@ -153,10 +154,12 @@ void loop()
     CatInTrigger = false;
     CatOutTrigger = false;
   }
-  unsigned long batteryPcnt = (readVcc() * 100) / maxBattery;
-  Serial.print("Battery:");
-  Serial.println(batteryPcnt);
-  sensor_node.sendBatteryLevel(batteryPcnt);
+  //unsigned long batteryPcnt = (readVcc() * 100) / maxBattery;
+  //Serial.print("Battery:");
+  //Serial.print(batteryPcnt);
+  //Serial.print("---");
+  //Serial.println(readVcc());
+  sensor_node.sendBatteryLevel(readVcc());
   sensor_node.wait(500);
   
   sensor_node.request(PRIMARY_CHILD_ID, V_VAR1);
@@ -202,27 +205,25 @@ void incomingMessage(const MyMessage & message)
 
 long readVcc()
 {
-  // Read 1.1V reference against AVcc
-  // set the reference to Vcc and the measurement to the internal 1.1V reference
-#if defined(__AVR_ATmega32U4__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-  ADMUX = _BV(REFS0) | _BV(MUX4) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
-#elif defined (__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__)
-  ADMUX = _BV(MUX5) | _BV(MUX0);
-#elif defined (__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
-  ADMUX = _BV(MUX3) | _BV(MUX2);
+    // use the 1.1 V internal reference
+#if defined(__AVR_ATmega2560__)
+  // analogReference(INTERNAL1V1);
 #else
-  ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
+   //analogReference(INTERNAL);
 #endif
 
-  delay(2); // Wait for Vref to settle
-  ADCSRA |= _BV(ADSC); // Start conversion
-  while (bit_is_set(ADCSRA, ADSC)); // measuring
-
-  uint8_t low  = ADCL; // must read ADCL first - it then locks ADCH
-  uint8_t high = ADCH; // unlocks both
-
-  long result = (high << 8) | low;
-
-  result = 1125300L / result; // Calculate Vcc (in mV); 1125300 = 1.1*1023*1000
-  return result; // Vcc in millivolts
+ int sensorValue = analogRead(BATTERY_SENSE_PIN);
+// 1M, 470K divider across battery and using internal ADC ref of 1.1V
+   // Sense point is bypassed with 0.1 uF cap to reduce noise at that point
+   // ((1e6+470e3)/470e3)*1.1 = Vmax = 3.44 Volts
+   // 3.44/1023 = Volts per bit = 0.003363075
+   float batteryV  = sensorValue * 0.0047212121212121;//0.003363075;
+   int batteryPcnt = (batteryV / 4.8)*100;
+    Serial.print("sensorValue:");
+    Serial.println(sensorValue);
+        Serial.print("batteryV:");
+    Serial.println(batteryV);
+    Serial.print("batteryPcnt:");
+    Serial.println(batteryPcnt);
+  return batteryPcnt; // Vcc in millivolts
 }
